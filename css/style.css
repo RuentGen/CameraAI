@@ -1,0 +1,27 @@
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+#input_video{
+    transform: scaleX(-1);
+    display: none;
+}
+#output_canvas{
+    transform: scaleX(-1);
+}
+#pointsCanvas{
+    width: 640px;
+    height: 480px;
+    position: absolute;
+    top: 0;
+    transform: scaleX(-1);
+}
+.overlay_canvas{
+    width: 680px;
+    height: 480px;
+    top: 0;
+    position: absolute;
+}
