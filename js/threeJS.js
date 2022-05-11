@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'https://unpkg.com/three@0.123.0/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'https://unpkg.com/three@0.123.0/examples/jsm/loaders/RGBELoader.js';
-// import { OrbitControls } from 'https://unpkg.com/three@0.123.0/examples/jsm/controls/OrbitControls.js'
+import { OrbitControls } from 'https://unpkg.com/three@0.123.0/examples/jsm/controls/OrbitControls.js'
 // import { RGBELoader } from 'https://unpkg.com/three@0.123.0/examples/jsm/loaders/RGBELoader.js'
 // import { FlakesTexture } from 'https://unpkg.com/three@0.123.0/examples/jsm/textures/FlakesTexture.js'
 
@@ -27,7 +27,6 @@ const sizes = {
 const loader = new GLTFLoader();
 const rgbeLoader = new RGBELoader()
 
-
 let pt_matrix_three_js_format = null;
 let euler_angles = null;
 let pitch = null;
@@ -36,15 +35,17 @@ let roll = null;
 
 const loadModel = (file) => {
 	return new Promise((res, rej) => {
-			rgbeLoader.load('https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr', (texture) => {
+			rgbeLoader.setPath('/assets/texture/').load('royal_esplanade_1k.hdr', (texture) => {
 			const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+
+			texture.mapping = THREE.EquirectangularReflectionMapping;
 
     		// scene.background = envMap;
 			scene.environment = envMap;	
-
+			scene.position.set(0, 0, 0)
+			
 			texture.dispose();
 			pmremGenerator.dispose();
-
 			loader.load(file,(glb) => {
 				const glasses = glb.scene;
 				setInterval(() => {
@@ -66,9 +67,11 @@ const loadModel = (file) => {
 					glasses.position.y = -yPosition //- (yPosition * (99 / 100))
 					glasses.position.z = -zPosition //- (zPosition * (10 / 100))
 					
-					glasses.scale.x = distance(RIGHT_EYE[0], LEFT_EYE[0]) * 12
-					glasses.scale.y = distance(RIGHT_EYE[0], LEFT_EYE[0]) * 12
-					glasses.scale.z = distance(RIGHT_EYE[0], LEFT_EYE[0]) * 12
+					glasses.scale.x = distance(RIGHT_EYE[0], LEFT_EYE[0])
+					glasses.scale.y = distance(RIGHT_EYE[0], LEFT_EYE[0])
+					glasses.scale.z = distance(RIGHT_EYE[0], LEFT_EYE[0])
+
+					console.log(glasses.rotation.x)
 	
 				});
 				res(glasses)
@@ -96,7 +99,7 @@ const distance = (pos1, pos2) => {
 
 const init = async () => {
 
-	model = await loadModel('./assets/models/OD2204009-02/OD2204009-02.gltf') 
+	model = await loadModel('./assets/models/glassesgreen.glb') 
 	scene.add(model);
 
 	pmremGenerator.compileEquirectangularShader();
@@ -104,18 +107,27 @@ const init = async () => {
 	const hemisphereLight = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
 	scene.add( hemisphereLight );
 
-	const ambiantLight = new THREE.AmbientLight( 0x404040 , 2 ); // soft white light
+	const pointLight1 = new THREE.PointLight( 0xffffff, 1);
+	pointLight1.position.set( 150, 10, 0 );
+	pointLight1.castShadow = false;
+	scene.add( pointLight1 );
+
+	const ambiantLight = new THREE.AmbientLight( 0xffffff , 1 ); // soft white light
 	scene.add( ambiantLight );
 
-	const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
+	const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
 	directionalLight.position.set(0, 1, 5)
 	scene.add(directionalLight)
 
 
 	const camera = new THREE.PerspectiveCamera( 20, sizes.width / sizes.height, 0.1, 1000); 
 	camera.position.set( 0, 0, 30)
-	// camera.lookAt({x: x, y: 300, z: 300, isVector3: true})
+	camera.lookAt({x: canvas.width / 2, y: canvas.height / 2, z: 0, isVector3: true})
 	scene.add(camera)
+
+	const controls = new OrbitControls( camera, renderer.domElement );
+	controls.target.set( 0, 0, - 0.2 );
+	controls.update();
 
 	renderer.setSize(sizes.width,sizes.height);
 	renderer.setPixelRatio(window.devicePixelRatio);
@@ -127,6 +139,7 @@ const init = async () => {
 
 	const animate = () => {
 		requestAnimationFrame(animate)
+		controls.update();
 		renderer.render(scene, camera);
 	}
 

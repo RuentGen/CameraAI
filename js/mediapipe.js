@@ -28,7 +28,7 @@ const drawingUtils = window;
 const mpFaceDetection = window;
 const mpFaceMesh = window;
 
-
+const canvasAspectRatio = canvasElement.width / canvasElement.height;
 
 // Face Detection
 const onFaceDectectResults = async (results) => {
@@ -163,8 +163,8 @@ const calculateSkew = (landmarks) => {
     EYE_MIDPOINT = eyeMidPoint
 
     // Glasses position
-    xPosition = ((FACEMESH_GLABELLA[0].x * Math.sqrt(640)) - 12.7) / 2
-    yPosition = ((FACEMESH_GLABELLA[0].y * Math.sqrt(480)) - 9.8) / 2
+    xPosition = FACEMESH_GLABELLA[0].x
+    yPosition = FACEMESH_GLABELLA[0].y 
     zPosition = FACEMESH_GLABELLA[0].z
 
 
@@ -179,7 +179,7 @@ const calculateHeadDimention = (landmarks) => {
   const leftFace = landmarks[134]
   const rightFace = landmarks[454]
 
-  const canvasAspectRatio = canvasElement.width / canvasElement.height;
+
 
 
   const faceHeight = Math.sqrt(
